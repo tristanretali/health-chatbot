@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@300&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+}
+main{
+    font-family: 'Anuphan', sans-serif;
+    min-height: 100vh;
+    width: 50%;
+    margin-left: 25%;
+    margin-right: 25%;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+}
+h1{
+    font-size: 60px;
+    padding-bottom: 1%;
+}
+#answers{
+    border: solid 1px;
+    border-radius: 15px;
+    background-color: #ECF2FF;
+}
+.message{
+    font-size: 20px;
+}
+form{
+    margin-top: 1%;
+    height: 45px;
+    display: flex;
+    justify-content: space-between;
+}
+#symptom-input{
+    width: 85%;
+    border: solid 1px;
+    border-radius: 15px;
+}
+#button{
+    background-color: white;
+    width: 12%;
+    border: solid 1px;
+    border-radius: 15px;
+}
+
+

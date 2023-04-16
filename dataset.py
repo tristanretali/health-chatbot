@@ -4,7 +4,9 @@ import csv
 import os
 
 DISEASE_SYMPTOMES = "./datasets/disease_symptomes.csv"
+PRECAUTION = "./datasets/symptom_precaution.csv"
 DISEASE_SYMPTOMES_FORMATTING = "./datasets/disease_symptomes_formatting.csv"
+DATASET = "dataset.csv"
 
 def delete_files():
     os.remove(DISEASE_SYMPTOMES_FORMATTING)
@@ -18,20 +20,7 @@ def disease_symptomes_formatting():
         filewriter.writerow(df.columns)
         for index, row in df.iterrows():
             filewriter.writerow(row)
-            print(index)
-    #     if not row[0] in diseases_informations.keys():
-    #         diseases_informations[row[0]] = [] 
-    #     for values in row.items():
-    #         #if row[i] != "":
-    #         if not values[1] in diseases_informations.get(row[0]):
-    #             diseases_informations.get(row[0]).append(values[1])
-    # print(diseases_informations.get("Fungal infection"))    
-                #print(values)
-           #print('Disease is: {}; Symptoms : {}'.format(row["Disease"], row["Symptom_1"]))
-        #filewriter.writerow(['Derek', 'Software Developer'])
-        #filewriter.writerow(['Steve', 'Software Developer'])
-        #filewriter.writerow(['Paul', 'Manager'])
-    #print(df.columns)
+
 
 
 
