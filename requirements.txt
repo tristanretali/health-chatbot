@@ -1,6 +1,4 @@
 flask
 openai
 pandas
-numpy
-csv
 os
