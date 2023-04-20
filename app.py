@@ -8,7 +8,6 @@ app = Flask(__name__)
 
 
 openai.api_key = API_KEY 
-openai.Model.list()
 
 BASIC_PROMPT = "return me each symptom you see in the following sentence and separate them with ',' :"
 
