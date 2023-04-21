@@ -2,18 +2,25 @@ import pandas as pd
 import csv
 import os
 
+# Path for each dataset
 DISEASE_SYMPTOMS_1 = "./datasets/original_datasets/disease_symptoms.csv"
 DISEASE_SYMPTOMS_2 = "./datasets/original_datasets/disease_and_symptoms.csv"
-PRECAUTIONS = "./datasets/original_datasets/symptom_precaution.csv"
-DISEASE_SYMPTOMS_FORMATTING = "./datasets/formatting_datasets/disease_symptoms_formatting.csv"
+FORMATTING_DATASET = "./datasets/formatting_dataset.csv"
 
 def delete_files():
-    os.remove(DISEASE_SYMPTOMS_FORMATTING)
+    os.remove(FORMATTING_DATASET)
+
+def create_dataset():
+    """
+    Create the final dataset
+    """
+    disease_symptoms_formatting()
+    disease_and_symptoms_formatting()
 
 def disease_symptoms_formatting():
     df = pd.read_csv(DISEASE_SYMPTOMS_1)
     df.drop_duplicates(subset="Disease", keep="first", inplace=True) 
-    with open(DISEASE_SYMPTOMS_FORMATTING, 'x') as csvfile:
+    with open(FORMATTING_DATASET, 'x') as csvfile:
         filewriter = csv.writer(csvfile, delimiter=',', lineterminator='\n')
         filewriter.writerow(df.columns)
         for index, row in df.iterrows():
@@ -22,14 +29,23 @@ def disease_symptoms_formatting():
 def disease_and_symptoms_formatting():
     usecols = ["name", "symptoms"]
     df = pd.read_csv(DISEASE_SYMPTOMS_2, usecols=usecols)
-    with open(DISEASE_SYMPTOMS_FORMATTING, 'a') as csvfile:
+    with open(FORMATTING_DATASET, 'a') as csvfile:
         filewriter = csv.writer(csvfile, delimiter=',', lineterminator='\n')       
         for index, row in df.iterrows():
             symptoms = parse_symptoms(row)
             filewriter.writerow(symptoms)
             
-            
+     
 def parse_symptoms(row: any) ->list :
+    """
+    Parse the current row
+
+    Args:
+        row (any): the current row of the dataset
+
+    Returns:
+        list: return all symptoms of the current row
+    """
     symptoms = row["symptoms"].split("{")
     for i in range (len(symptoms)):
         symptoms[i] = symptoms[i][symptoms[i].find(':')+1:symptoms[i].find('}')]
@@ -38,12 +54,27 @@ def parse_symptoms(row: any) ->list :
     return symptoms
 
 def delete_symptoms_id(symptoms: list):
+    """
+    Delete the symptoms id of the list
+
+    Args:
+        symptoms (list): our current symptoms list
+    """
     for i in symptoms:
         if not is_a_valid_symptom(i):
             symptoms.remove(i)
 
 
 def is_a_valid_symptom(symptom: str) ->bool:
+    """
+    Check the value of a symptom
+
+    Args:
+        symptom (str): the current symptom
+
+    Returns:
+        bool: return true iff the symptom is not a number
+    """
     for i in symptom:
         if i >= '0' and i <= '9':
             return False
@@ -52,8 +83,7 @@ def is_a_valid_symptom(symptom: str) ->bool:
 
 def main():
     delete_files()
-    disease_symptoms_formatting()
-    disease_and_symptoms_formatting()
+    create_dataset()
 
 if __name__ == "__main__":
     main()
