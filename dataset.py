@@ -5,10 +5,13 @@ import os
 # Path for each dataset
 DISEASE_SYMPTOMS_1 = "./datasets/original_datasets/disease_symptoms.csv"
 DISEASE_SYMPTOMS_2 = "./datasets/original_datasets/disease_and_symptoms.csv"
+DISEASE_SYMPTOMS_3= "./datasets/original_datasets/symptoms_research_paper.csv"
 FORMATTING_DATASET = "./datasets/formatting_dataset.csv"
+DATASET = "./datasets/dataset.csv"
 
 def delete_files():
     os.remove(FORMATTING_DATASET)
+   # os.remove(DATASET)
 
 def create_dataset():
     """
@@ -34,8 +37,23 @@ def disease_and_symptoms_formatting():
         for index, row in df.iterrows():
             symptoms = parse_symptoms(row)
             filewriter.writerow(symptoms)
-            
-     
+
+def symptoms_research_paper_formatting():
+    usecols=["Symptom", "Disease"]
+    all_diseases = {}
+    df = pd.read_csv(DISEASE_SYMPTOMS_3, usecols=usecols, delimiter='	')
+    with open(FORMATTING_DATASET, 'a') as csvfile:
+        filewriter = csv.writer(csvfile, delimiter=',', lineterminator='\n')
+        for index, row in df.iterrows():        
+            if not row["Disease"] in all_diseases :
+                all_diseases[row["Disease"]] = [row["Symptom"]]
+        print(all_diseases["Respiratory Syncytial Virus Infections"])
+
+
+def disease_not_find(all_diseases: list) -> bool:
+    return True
+
+
 def parse_symptoms(row: any) ->list :
     """
     Parse the current row
@@ -64,7 +82,6 @@ def delete_symptoms_id(symptoms: list):
         if not is_a_valid_symptom(i):
             symptoms.remove(i)
 
-
 def is_a_valid_symptom(symptom: str) ->bool:
     """
     Check the value of a symptom
@@ -80,10 +97,10 @@ def is_a_valid_symptom(symptom: str) ->bool:
             return False
     return True
 
-
 def main():
     delete_files()
     create_dataset()
+    symptoms_research_paper_formatting()
 
 if __name__ == "__main__":
     main()
