@@ -45,14 +45,10 @@ def symptoms_research_paper_formatting():
     with open(FORMATTING_DATASET, 'a') as csvfile:
         filewriter = csv.writer(csvfile, delimiter=',', lineterminator='\n')
         for index, row in df.iterrows():        
-            if not row["Disease"] in all_diseases :
-                all_diseases[row["Disease"]] = [row["Symptom"]]
-        print(all_diseases["Respiratory Syncytial Virus Infections"])
-
-
-def disease_not_find(all_diseases: list) -> bool:
-    return True
-
+            fill_dict(all_diseases, row)
+        
+        for value in all_diseases.values():
+            filewriter.writerow(value)
 
 def parse_symptoms(row: any) ->list :
     """
@@ -96,6 +92,12 @@ def is_a_valid_symptom(symptom: str) ->bool:
         if i >= '0' and i <= '9':
             return False
     return True
+
+def fill_dict(all_diseases: dict, row: any):
+    if not row["Disease"] in all_diseases :
+        all_diseases[row["Disease"]] = [row["Disease"], row["Symptom"]]
+    else:
+        all_diseases.get(row["Disease"]).append(row["Symptom"]) 
 
 def main():
     delete_files()
