@@ -1,6 +1,7 @@
 import pandas as pd
 import csv
 import os
+import random
 
 # Path for each dataset
 DISEASE_SYMPTOMS_1 = "./datasets/original_datasets/diseases_symptoms_1.csv"
@@ -8,6 +9,11 @@ DISEASE_SYMPTOMS_2 = "./datasets/original_datasets/diseases_symptoms_2.csv"
 DISEASE_SYMPTOMS_3= "./datasets/original_datasets/diseases_symptoms_3.csv"
 FORMATTING_DATASET = "./datasets/formatting_dataset.csv"
 DATASET = "./datasets/dataset.csv"
+TEST_DATASET = "./datasets/test_dataset.csv"
+
+def remove_datasets():
+    #os.remove(DATASET)
+    os.remove(TEST_DATASET)
 
 def create_dataset():
     """
@@ -17,6 +23,18 @@ def create_dataset():
     disease_symptoms_1_formatting()
     disease_symptoms_2_formatting()
     disease_symptoms_3_formatting()
+
+def create_test_dataset():
+    data = {}
+    df = pd.read_csv(DATASET)
+    nb_elements = int(df.shape[0] * 0.10) 
+    with open(TEST_DATASET, 'x') as csvfile: 
+        filewriter = csv.writer(csvfile, delimiter=',', lineterminator='\n')
+        filewriter.writerow(df.columns)
+        for i in range (nb_elements):
+            current_row = df.iloc[random.randint(0, df.shape[0])]
+            data[current_row["disease"]] = fill_test_dataset(current_row)
+        filewriter.writerows(data.items())
 
 def disease_symptoms_1_formatting():
     """
@@ -130,9 +148,18 @@ def is_string_type(symptom) ->bool:
     """
     return not isinstance(symptom[1], float)
 
+def fill_test_dataset(current_row) -> str:
+    all_symptoms = current_row["symptoms"].split()
+    remove_number = random.randint(0, len(all_symptoms)-1)
+    for i in range(remove_number):
+        all_symptoms.pop(random.randint(0, len(all_symptoms)-1))
+    symptoms = ' '.join(all_symptoms)
+    return symptoms
+
 def main():
-    os.remove(DATASET)
-    create_dataset()
+    remove_datasets()
+    #create_dataset()
+    create_test_dataset()
 
 if __name__ == "__main__":
     main()
