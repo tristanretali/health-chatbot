@@ -71,9 +71,9 @@ def x_treatment(x_value):
     x_train_sequences = tokenizer.texts_to_sequences(x_value)
     x_train_sequences = pad_sequences(x_train_sequences, padding="post", maxlen=SEQUENCES_PADDING)
 
-    print(f"The vocabulary size: {len(tokenizer.index_word) + 1}")
-    print(x_value[0])
-    print(x_train_sequences[0])
+    #print(f"The vocabulary size: {len(tokenizer.index_word) + 1}")
+    #print(x_value[0])
+    #print(x_train_sequences[0])
     return x_train_sequences
 
 '''def y_treatment(y_value):
@@ -88,12 +88,14 @@ def create_model(x_train, y_train, x_test, y_test):
     model.add(Embedding(input_dim=VOCAB_SIZE, input_length=SEQUENCES_PADDING, output_dim=OUTPUT_DIM))
     model.add(Conv1D(filters=128, kernel_size=3, activation='relu'))
     model.add(GlobalMaxPool1D())
+    model.add(Dense(256, activation="relu"))
     model.add(Dense(4869, activation="softmax"))
     model.summary()
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
     #output_array = model.predict(x_value)
     #print(output_array)
-    history = model.fit(x_train, y_train, epochs=EPOCH, batch_size=BATCH_SIZE, validation_split=0.1, validation_data=(x_test, y_test))
+    model.fit(x_train, y_train, epochs=EPOCH, batch_size=BATCH_SIZE, validation_split=0.1, validation_data=(x_test, y_test))
+    model.save("model")
     score = model.evaluate(x_test, y_test)
     print("Test loss:", score[0])
     print("Test accuracy:", score[1])
@@ -115,8 +117,8 @@ def main():
     #Data to test the model
     x_test_sequences = x_treatment(df_test["symptoms"])
     y_test = pd.get_dummies(df_test["disease"]).values
-    print(x_train_sequences.shape, y_train.shape)
-    #create_model(x_train_sequences, y_train, x_test_sequences, y_test)
+    #print(x_train_sequences.shape, y_train.shape)
+    create_model(x_train_sequences, y_train, x_test_sequences, y_test)
 
 if __name__ == "__main__":
     main()
