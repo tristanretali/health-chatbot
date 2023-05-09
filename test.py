@@ -76,64 +76,68 @@ X_train, X_test, Y_train, Y_test = train_test_split(
 # print(X_test.shape, Y_test.shape)
 
 
-# model = Sequential()
-# # Use 50 length vectors to represent each work
-# model.add(Embedding(VOCAB_SIZE, EMBEDDING_DIM, input_length=SEQUENCES_PADDING))
-# model.add(SpatialDropout1D(0.2))
-# model.add(LSTM(100, dropout=0.2, recurrent_dropout=0.2))
-# model.add(Dense(4, activation="softmax"))
-# model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
-# model.summary()
-# history = model.fit(
-#     X_train,
-#     Y_train,
-#     epochs=EPOCH,
-#     batch_size=BATCH_SIZE,
-#     validation_split=0.1,
-#     callbacks=[EarlyStopping(monitor="val_loss", patience=3, min_delta=0.0001)],
-# )
+model = Sequential()
+# Use 50 length vectors to represent each work
+model.add(Embedding(VOCAB_SIZE, EMBEDDING_DIM, input_length=SEQUENCES_PADDING))
+model.add(SpatialDropout1D(0.2))
+model.add(LSTM(100, dropout=0.2, recurrent_dropout=0.2))
+model.add(Dense(4, activation="softmax"))
+model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+model.summary()
+history = model.fit(
+    X_train,
+    Y_train,
+    epochs=EPOCH,
+    batch_size=BATCH_SIZE,
+    validation_split=0.1,
+    callbacks=[EarlyStopping(monitor="val_loss", patience=3, min_delta=0.0001)],
+)
 
-# accr = model.evaluate(X_test, Y_test)
-# print("Test loss:", accr[0])
-# print("Test accuracy:", accr[1])
+accr = model.evaluate(X_test, Y_test)
+print("Test loss:", accr[0])
+print("Test accuracy:", accr[1])
 
-# plt.title("Loss")
-# plt.plot(history.history["loss"], label="train")
-# plt.plot(history.history["val_loss"], label="test")
-# plt.legend()
-# plt.show()
-# plt.title("Accuracy")
-# plt.plot(history.history["accuracy"], label="train")
-# plt.plot(history.history["val_accuracy"], label="test")
-# plt.legend()
-# plt.show()
-
-# # Each label used for the model training
-# labels = ["Allergy", "Chronic cholestasis", "Fungal infection", "GERD"]
-# # Test model prediction
-# sentences1 = ["itching skin rash nodal skin eruptions dischromic patches"]
-# sentences2 = ["stomach pain acidity ulcers on tongue vomiting cough chest pain"]
-# seq1 = tokenizer.texts_to_sequences(sentences1)
-# seq2 = tokenizer.texts_to_sequences(sentences2)
-# padded1 = pad_sequences(seq1, maxlen=SEQUENCES_PADDING)
-# print(f"padded1: {padded1}")
-# padded2 = pad_sequences(seq2, maxlen=SEQUENCES_PADDING)
-# print(f"padded2: {padded2}")
-# pred1 = model.predict(padded1)
-# print(labels)
-# print(pred1, labels[np.argmax(pred1)])
-# pred2 = model.predict(padded2)
-# print(pred1, labels[np.argmax(pred2)])
+plt.title("Loss")
+plt.plot(history.history["loss"], label="train")
+plt.plot(history.history["val_loss"], label="test")
+plt.legend()
+plt.show()
+plt.title("Accuracy")
+plt.plot(history.history["accuracy"], label="train")
+plt.plot(history.history["val_accuracy"], label="test")
+plt.legend()
+plt.show()
 
 
-def set_label(df_train, Y):
-    df_train["disease"].iloc[:1000].drop_duplicates().values.flatten().tolist()
+def set_label(df_train, Y) -> list:
+    diseases = (
+        df_train["disease"].iloc[:1000].drop_duplicates().values.flatten().tolist()
+    )
+    res = list(range(len(diseases)))
     # np.vstack(list(set(tuple(row) for row in Y)))  np.unique(Y, axis=0)
     labels_number = []
     for i in Y:
         if list(i) not in labels_number:
             labels_number.append(list(i))
-    print(labels_number)
+    for i in range(len(diseases)):
+        index = labels_number[i].index(1)
+        res[index] = diseases[i]
+    return res
 
 
-set_label(df_train, Y)
+# Each label used for the model training
+labels = set_label(df_train, Y)
+# Test model prediction
+sentences1 = ["My name is Tristan"]
+sentences2 = ["stomach pain acidity ulcers on tongue vomiting cough chest pain"]
+seq1 = tokenizer.texts_to_sequences(sentences1)
+seq2 = tokenizer.texts_to_sequences(sentences2)
+padded1 = pad_sequences(seq1, maxlen=SEQUENCES_PADDING)
+print(f"padded1: {padded1}")
+padded2 = pad_sequences(seq2, maxlen=SEQUENCES_PADDING)
+print(f"padded2: {padded2}")
+pred1 = model.predict(padded1)
+print(labels)
+print(pred1, labels[np.argmax(pred1)])
+pred2 = model.predict(padded2)
+print(pred1, labels[np.argmax(pred2)])
