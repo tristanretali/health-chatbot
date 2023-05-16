@@ -58,7 +58,7 @@ form{
     justify-content: space-between;
 }
 #symptom-input{
-    width: 85%;
+    width: 90%;
     border: solid 1px;
     border-radius: 10px;
 }
@@ -70,7 +70,7 @@ input[type="submit"]{
 }
 #button{
     background-color: white;
-    width: 12%;
+    width: 8%;
     border: solid 1px;
     border-radius: 15px;
 }
