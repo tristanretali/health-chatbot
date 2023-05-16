@@ -6,8 +6,8 @@
 main{
     font-family: 'Anuphan', sans-serif;
     min-height: 100vh;
-    width: 50%;
-    margin-left: 25%;
+    width: 80%;
+    margin-left: 10%;
     margin-right: 25%;
     display: flex;
     justify-content: center;
@@ -18,13 +18,38 @@ h1{
     font-size: 60px;
     padding-bottom: 1%;
 }
-#answers{
+p{
+    font-size: 15px;
+    color: aliceblue;
+}
+#chatbot{
+    background-color: #ECF2FF;
+    height: 650px;
     border: solid 1px;
     border-radius: 15px;
-    background-color: #ECF2FF;
+    padding-bottom: 1%;
+    padding-left: 1%;
+    padding-right: 1%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+#answer{
+    color: white;
 }
 .message{
-    font-size: 20px;
+    background-color: #3776FF;
+    max-width: 45%;
+    text-align: left;
+    padding-left: 1%;
+    padding-bottom: 1%;
+    padding-top: 1%;
+    border-radius: 15px;
+}
+
+.message:nth-child(2n){
+    background-color: #55B75B;
+    margin-left: 54%;
 }
 form{
     margin-top: 1%;
@@ -35,7 +60,13 @@ form{
 #symptom-input{
     width: 85%;
     border: solid 1px;
-    border-radius: 15px;
+    border-radius: 10px;
+}
+input[type="text"]{
+    background-color: white;
+}
+input[type="submit"]{
+    font-size: 17px;
 }
 #button{
     background-color: white;

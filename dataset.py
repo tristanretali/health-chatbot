@@ -17,9 +17,9 @@ TEST_DATASET = "./datasets/test_dataset.csv"
 
 def remove_datasets():
     # os.remove(DATASET)
-    os.remove(FINAL_DATASET)
+    # os.remove(FINAL_DATASET)
     # os.remove(TEST_DATASET)
-    # os.remove(DISEASE_MEDICATION_DATASET)
+    os.remove(DISEASE_MEDICATION_DATASET)
 
 
 def create_dataset():
@@ -227,7 +227,7 @@ def create_medication_list(nb_medication: int, all_medications: list) -> str:
     for i in range(nb_medication):
         medication = all_medications[random.randint(0, len(all_medications) - 1)]
         if medications.find(medication) == -1:
-            medications += f"{medication} "
+            medications += f"{medication}, "
     medications = remove_ponctuation(medications)
     return medications
 
@@ -247,9 +247,9 @@ def fill_disease_medication_dataset(data: dict):
 def main():
     remove_datasets()
     # create_dataset()
-    create_final_dataset()
+    # create_final_dataset()
     # create_test_dataset()
-    # create_disease_medication_dataset()
+    create_disease_medication_dataset()
 
 
 if __name__ == "__main__":

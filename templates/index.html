@@ -10,15 +10,20 @@
 <body>
     <main>
         <h1>Health Chat Bot</h1>
-        <div id="answers">
-            {% for message in all_messages %}
-                <p class="message">{{ message }}</p>
-            {% endfor %}
+        <div id="chatbot">
+            <h3>{{ welcome_msg }}</h3>
+            <div id="user-area">
+                <div id="answers">
+                    {% for message in all_messages %}
+                        <p class="message">{{ message }}</p>
+                    {% endfor %}
+                </div>
+                <form action="/ask" method="post">
+                    <input type="text" name="symptom-input" placeholder=" Enter your Symptoms" id="symptom-input">
+                    <input type="submit" value="Send" id="button">
+                </form>
+            </div>
         </div>
-        <form action="/ask" method="post">
-            <input type="text" name="symptom-input" placeholder="Enter your Symptoms" id="symptom-input">
-            <input type="submit" value="Send" id="button">
-        </form>
     </main>
 </body>
 </html>

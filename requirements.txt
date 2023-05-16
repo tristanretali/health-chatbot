@@ -2,3 +2,5 @@ flask
 openai
 pandas
 tensorflow
+seaborn
+scikit-learn
