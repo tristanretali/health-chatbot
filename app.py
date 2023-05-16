@@ -2,34 +2,39 @@ from flask import Flask, render_template, request
 import openai
 import pandas as pd
 import numpy as np
+import utils
 from tensorflow import keras
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-from keras.preprocessing.text import Tokenizer
 
+
+app = Flask(__name__)
 
 API_KEY = "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"
 MODEL = keras.models.load_model("model")
-SEQUENCES_PADDING = 100
-VOCAB_SIZE = 740
-df = pd.read_csv("./datasets/disease_medication_dataset.csv").iloc[:250000]
-df_fit = pd.read_csv("./datasets/final_dataset.csv").iloc[:250000]
+df = pd.read_csv("./datasets/disease_medication_dataset.csv")
+df_fit = utils.df_symptoms
 Y = pd.get_dummies(df_fit["disease"]).values
-tokenizer = Tokenizer(num_words=VOCAB_SIZE)
-tokenizer.fit_on_texts(df_fit["symptoms"].values)
-
-app = Flask(__name__)
+tokenizer = utils.create_tokenizer()
 
 openai.api_key = API_KEY
 
 BASIC_PROMPT = "return me each symptom you see in the following sentence and separate them with a blank space and in lower case. If you don't see a symptom return me 'failed' in lower case:"
 
-welcome_msg = (
-    "Welcome in your new health ChatBot, let's ask questions about your health"
-)
+welcome_msg = "Welcome in your new Health ChatBot, enter your symptoms"
 all_messages = []
 
 
-def set_label(df_train, Y):
+def set_label(df_train, Y) -> list:
+    """
+    Put the disease at their right place in a list
+
+    Args:
+        df_train (DataFrame): the dataset who contain my diseases
+        Y (ndarray): the Disease with the one hot encoder
+
+    Returns:
+        list: return the list of diseases at their right place for the predictions
+    """
     # Create list with lenght = diseases number
     labels = list(
         range(len(df_train["disease"].drop_duplicates().values.flatten().tolist()))
@@ -40,22 +45,50 @@ def set_label(df_train, Y):
     return labels
 
 
-LABELS = set_label(df_fit, Y)
+# Set the labels
+LABELS = set_label(df_fit, utils.Y)
 
 
 def generate_prompt(user_input: str) -> str:
+    """
+    Create the prompt who will be send to the OpenAI API
+
+    Args:
+        user_input (str): the symptoms of the user
+
+    Returns:
+        str: return the entire prompt
+    """
     return f"{BASIC_PROMPT} {user_input}"
 
 
 def prediction(input: str) -> str:
+    """
+    Give the input to the model and predict a disease
+
+    Args:
+        input (str): the symptoms
+
+    Returns:
+        str: return the disease predict by the model
+    """
     seq_input = tokenizer.texts_to_sequences([input])
-    padded_input = pad_sequences(seq_input, maxlen=SEQUENCES_PADDING)
+    padded_input = pad_sequences(seq_input, maxlen=utils.SEQUENCES_PADDING)
     prediction = MODEL.predict(padded_input)
     right_prediction = LABELS[np.argmax(prediction)]
     return right_prediction
 
 
 def find_medications(disease: str) -> str:
+    """
+    Search the medication for a specific disease
+
+    Args:
+        disease (str): the disease predict by the model
+
+    Returns:
+        str: return the medications associate to the disease
+    """
     for i, row in df.iterrows():
         if row["disease"] == disease:
             return row["medication"][:-2]
@@ -87,7 +120,7 @@ def ask():
             )
         else:
             all_messages.append(
-                f"You potentially have the Disease {prediction(current_response)}. \n You should try these medications: {find_medications(prediction(current_response))}"
+                f"You potentially have a {prediction(current_response)}. You should try these medications: {find_medications(prediction(current_response))}"
             )
     return render_template(
         "index.html", welcome_msg=welcome_msg, all_messages=all_messages

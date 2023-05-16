@@ -1,6 +1,7 @@
 import pandas as pd
 import csv
 import os
+import utils
 import random
 
 # Path for each dataset
@@ -10,45 +11,30 @@ DISEASE_SYMPTOMS_3 = "./datasets/original_datasets/diseases_symptoms_3.csv"
 MEDICATION_DATASET = "./datasets/original_datasets/medication.csv"
 FORMATTING_DATASET = "./datasets/formatting_dataset.csv"
 DATASET = "./datasets/dataset.csv"
-DISEASE_MEDICATION_DATASET = "./datasets/disease_medication_dataset.csv"
 FINAL_DATASET = "./datasets/final_dataset.csv"
-TEST_DATASET = "./datasets/test_dataset.csv"
+DISEASE_MEDICATION_DATASET = "./datasets/disease_medication_dataset.csv"
 
 
 def remove_datasets():
     # os.remove(DATASET)
     # os.remove(FINAL_DATASET)
-    # os.remove(TEST_DATASET)
     os.remove(DISEASE_MEDICATION_DATASET)
 
 
 def create_dataset():
     """
-    Create the final dataset which include
-    symptoms for each diseases
+    Formatting of each dataset with the diseases
+    and symptoms and gather them in one file
     """
     disease_symptoms_1_formatting()
     disease_symptoms_2_formatting()
     disease_symptoms_3_formatting()
 
 
-def create_test_dataset():
-    data = {}
-    df = pd.read_csv(DATASET)
-    nb_elements = int(df.shape[0] * 0.10)
-    with open(TEST_DATASET, "x") as csvfile:
-        filewriter = csv.writer(csvfile, delimiter=",", lineterminator="\n")
-        filewriter.writerow(df.columns)
-        for i in range(nb_elements):
-            current_row = df.iloc[random.randint(0, df.shape[0])]
-            data[current_row["disease"]] = fill_test_dataset(current_row)
-        filewriter.writerows(data.items())
-
-
 def disease_symptoms_1_formatting():
     """
-    Fill the dataset with the disease
-    and symptoms data from the first
+    Fill the dataset with the diseases
+    and symptoms from the first
     dataset
     """
     data = {}
@@ -59,7 +45,7 @@ def disease_symptoms_1_formatting():
         filewriter.writerow(["disease", "symptoms"])
         for index, row in df.iterrows():
             for symptom in row.items():
-                if is_string_type(symptom):
+                if not isinstance(symptom[1], float):
                     if not row["Disease"] in data:
                         data[row["Disease"]] = ""
                     else:
@@ -69,8 +55,8 @@ def disease_symptoms_1_formatting():
 
 def disease_symptoms_2_formatting():
     """
-    Fill the dataset with the disease
-    and symptoms data from the second
+    Fill the dataset with the diseases
+    and symptoms from the second
     dataset
     """
     usecols = ["Disease", "symptoms"]
@@ -88,8 +74,8 @@ def disease_symptoms_2_formatting():
 
 def disease_symptoms_3_formatting():
     """
-    Fill the dataset with the disease
-    and symptoms data from the third
+    Fill the dataset with the diseases
+    and symptoms from the third
     dataset
     """
     usecols = ["Symptom", "Disease"]
@@ -106,31 +92,43 @@ def disease_symptoms_3_formatting():
 
 
 def create_final_dataset():
+    """
+    Create the final dataset with several rows
+    for each disease
+    """
     final_data = []
     df = pd.read_csv(DATASET)
     for index, row in df.iterrows():
-        # current_data = [row["disease"], row["symptoms"]]
         all_symptoms = row["symptoms"].split()
         if len(all_symptoms) > 4:
             for i in range(250):
                 remove_symptoms_number = random.randint(0, len(all_symptoms) - 2)
                 remove_symptoms(all_symptoms, remove_symptoms_number)
-                final_data.append([row["disease"], list_to_string(all_symptoms)])
+                final_data.append([row["disease"], utils.list_to_string(all_symptoms)])
                 all_symptoms = row["symptoms"].split()
     fill_final_dataset(final_data)
 
 
 def remove_symptoms(all_symptoms: list, remove_symptoms_number: int):
+    """
+    Remove specific number of symptoms to add a new row
+    for this one
+
+    Args:
+        all_symptoms (list): all symptoms for a specific diseases
+        remove_symptoms_number (int): number of symptoms who will be remove
+    """
     for i in range(remove_symptoms_number):
         all_symptoms.pop(random.randint(0, len(all_symptoms) - 1))
 
 
-def list_to_string(all_symptoms: list) -> str:
-    symptoms = " ".join(all_symptoms)
-    return symptoms
-
-
 def fill_final_dataset(final_data: list):
+    """
+    Fill the final dataset with all row created
+
+    Args:
+        final_data (list): all data for the dataset
+    """
     with open(FINAL_DATASET, "x") as csvfile:
         filewriter = csv.writer(csvfile, delimiter=",", lineterminator="\n")
         filewriter.writerow(["disease", "symptoms"])
@@ -138,7 +136,7 @@ def fill_final_dataset(final_data: list):
             filewriter.writerow(i)
 
 
-def parse_symptoms(row: any) -> list:
+def parse_symptoms(row) -> list:
     """
     Parse the current row
 
@@ -184,38 +182,22 @@ def is_a_valid_symptom(symptom: str) -> bool:
     return True
 
 
-def is_string_type(symptom) -> bool:
-    """
-    Check if the symptom is a string
-
-    Args:
-        symptom : the current symptom
-
-    Returns:
-        bool: return true iff the symptom is a string
-    """
-    return not isinstance(symptom[1], float)
-
-
-def fill_test_dataset(current_row) -> str:
-    all_symptoms = current_row["symptoms"].split()
-    remove_number = random.randint(0, len(all_symptoms) - 1)
-    for i in range(remove_number):
-        all_symptoms.pop(random.randint(0, len(all_symptoms) - 1))
-    symptoms = " ".join(all_symptoms)
-    return symptoms
-
-
 def create_disease_medication_dataset():
+    """
+    Create the dataset with the diseases and each
+    medication associated
+    """
     data = {}
-    # Open each csv
+    # Read each csv
     df_medication = pd.read_csv(MEDICATION_DATASET, usecols=["generic_name"])
     df_disease = pd.read_csv(FINAL_DATASET, usecols=["disease"])
     # Drop duplicates name
     df_medication.drop_duplicates(subset="generic_name", keep="first", inplace=True)
     df_disease.drop_duplicates(subset="disease", keep="first", inplace=True)
+    # Put all medications in a list
     all_medications = df_medication["generic_name"].values.flatten().tolist()
     for index, row in df_disease.iterrows():
+        # Generate a random number of medication who will be associated to a disease
         nb_medication = random.randint(2, 6)
         medications = create_medication_list(nb_medication, all_medications)
         data[row["disease"]] = medications
@@ -223,9 +205,20 @@ def create_disease_medication_dataset():
 
 
 def create_medication_list(nb_medication: int, all_medications: list) -> str:
+    """
+    Generate a string with a specific number of medications
+
+    Args:
+        nb_medication (int): number of medication in the string
+        all_medications (list): all medications of my dataset
+
+    Returns:
+        str: return the string with medications for a disease
+    """
     medications = ""
     for i in range(nb_medication):
         medication = all_medications[random.randint(0, len(all_medications) - 1)]
+        # Avoid the duplication problem
         if medications.find(medication) == -1:
             medications += f"{medication}, "
     medications = remove_ponctuation(medications)
@@ -233,11 +226,26 @@ def create_medication_list(nb_medication: int, all_medications: list) -> str:
 
 
 def remove_ponctuation(medications: str) -> str:
+    """
+    Remove ponctuation from the input
+
+    Args:
+        medications (str): The string with each medications
+
+    Returns:
+        str: return the input without ';' and '/'
+    """
     res = medications.replace(";", "").replace("/", " ")
     return res
 
 
 def fill_disease_medication_dataset(data: dict):
+    """
+    Fill the dataset with the diseases and each medications associated
+
+    Args:
+        data (dict): all data for the dataset
+    """
     with open(DISEASE_MEDICATION_DATASET, "x") as csvfile:
         filewriter = csv.writer(csvfile, delimiter=",", lineterminator="\n")
         filewriter.writerow(["disease", "medication"])
@@ -246,9 +254,10 @@ def fill_disease_medication_dataset(data: dict):
 
 def main():
     remove_datasets()
-    # create_dataset()
+    # disease_symptoms_1_formatting()
+    # disease_symptoms_2_formatting()
+    # disease_symptoms_3_formatting()
     # create_final_dataset()
-    # create_test_dataset()
     create_disease_medication_dataset()
 
 
