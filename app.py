@@ -92,6 +92,7 @@ def find_medications(disease: str) -> str:
     for i, row in df.iterrows():
         if row["disease"] == disease:
             return row["medication"][:-2]
+    return "There is no medications data for this disease"
 
 
 @app.route("/")

@@ -1,12 +1,7 @@
 from azure.ai.ml import MLClient
 from azure.identity import DefaultAzureCredential
 from azure.ai.ml.entities import AmlCompute
-from azure.ai.ml.entities import Environment
 from azure.ai.ml import command
-from azure.ai.ml import UserIdentityConfiguration
-from azure.ai.ml import Input
-
-import os
 
 credential = DefaultAzureCredential()
 
@@ -17,7 +12,6 @@ ml_client = MLClient(
     resource_group_name="tristan.retali-rg",
     workspace_name="health-chatbot-training",
 )
-print(ml_client)
 
 gpu_compute_target = "gpu-cluster"
 
@@ -56,11 +50,13 @@ print(
     f"AMLCompute with name {gpu_cluster.name} is created, the compute size is {gpu_cluster.size}"
 )
 
-env = ml_client.environments.get(name="keras-env", version="6")
+# Recover the environment which correspond to my project
+ENV = ml_client.environments.get(name="keras-env", version="6")
 
+# Initialize the job
 job = command(
     compute=gpu_compute_target,
-    environment=f"{env.name}:{env.version}",
+    environment=f"{ENV.name}:{ENV.version}",
     instance_count=1,
     code="./",
     command="python train.py",
@@ -68,4 +64,5 @@ job = command(
     display_name="classify-977-diseases-create-model-10-epochs",
 )
 
+# Create the job in the Azure ML Studio
 ml_client.jobs.create_or_update(job)

@@ -9,26 +9,15 @@ DISEASE_SYMPTOMS_1 = "./datasets/original_datasets/diseases_symptoms_1.csv"
 DISEASE_SYMPTOMS_2 = "./datasets/original_datasets/diseases_symptoms_2.csv"
 DISEASE_SYMPTOMS_3 = "./datasets/original_datasets/diseases_symptoms_3.csv"
 MEDICATION_DATASET = "./datasets/original_datasets/medication.csv"
-FORMATTING_DATASET = "./datasets/formatting_dataset.csv"
 DATASET = "./datasets/dataset.csv"
 FINAL_DATASET = "./datasets/final_dataset.csv"
 DISEASE_MEDICATION_DATASET = "./datasets/disease_medication_dataset.csv"
 
 
 def remove_datasets():
-    # os.remove(DATASET)
-    # os.remove(FINAL_DATASET)
+    os.remove(DATASET)
+    os.remove(FINAL_DATASET)
     os.remove(DISEASE_MEDICATION_DATASET)
-
-
-def create_dataset():
-    """
-    Formatting of each dataset with the diseases
-    and symptoms and gather them in one file
-    """
-    disease_symptoms_1_formatting()
-    disease_symptoms_2_formatting()
-    disease_symptoms_3_formatting()
 
 
 def disease_symptoms_1_formatting():
@@ -161,7 +150,7 @@ def delete_symptoms_id(symptoms: list):
     Args:
         symptoms (list): our current symptoms list
     """
-    for i in symptoms:
+    for i in symptoms[:]:
         if not is_a_valid_symptom(i):
             symptoms.remove(i)
 
@@ -197,7 +186,7 @@ def create_disease_medication_dataset():
     # Put all medications in a list
     all_medications = df_medication["generic_name"].values.flatten().tolist()
     for index, row in df_disease.iterrows():
-        # Generate a random number of medication who will be associated to a disease
+        # Generate a random number of medications which will be associated to a disease
         nb_medication = random.randint(2, 6)
         medications = create_medication_list(nb_medication, all_medications)
         data[row["disease"]] = medications
@@ -210,7 +199,7 @@ def create_medication_list(nb_medication: int, all_medications: list) -> str:
 
     Args:
         nb_medication (int): number of medication in the string
-        all_medications (list): all medications of my dataset
+        all_medications (list): all medications of the dataset
 
     Returns:
         str: return the string with medications for a disease
@@ -254,10 +243,10 @@ def fill_disease_medication_dataset(data: dict):
 
 def main():
     remove_datasets()
-    # disease_symptoms_1_formatting()
-    # disease_symptoms_2_formatting()
-    # disease_symptoms_3_formatting()
-    # create_final_dataset()
+    disease_symptoms_1_formatting()
+    disease_symptoms_2_formatting()
+    disease_symptoms_3_formatting()
+    create_final_dataset()
     create_disease_medication_dataset()
 
 
