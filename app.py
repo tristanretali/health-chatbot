@@ -3,6 +3,7 @@ import openai
 import pandas as pd
 import numpy as np
 import utils
+import random
 from tensorflow import keras
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
@@ -19,6 +20,12 @@ tokenizer = utils.create_tokenizer()
 openai.api_key = API_KEY
 
 BASIC_PROMPT = "return me each symptom you see in the following sentence and separate them with a blank space and in lower case. If you don't see a symptom return me 'failed' in lower case:"
+NO_DISEASE_MESSAGES = [
+    "I can't estimate a disease, provide me better informations", 
+    "This Chatbot estimates sicknesses based on symptoms and nothing else. Please respect that and enter your symptoms", 
+    "Provide me more details on your symptoms"
+]
+HELP_COMMAND = "Hi, this chatbot is designed to give you your sickness based on your symptoms and give you the different medications who treat this disease. Becareful, it's always better to consult a doctor."
 
 welcome_msg = "Welcome in your new Health ChatBot, enter your symptoms"
 all_messages = []
@@ -106,23 +113,25 @@ def default():
 def ask():
     if request.form["symptom-input"] != "":
         current_message = request.form["symptom-input"]
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=generate_prompt(current_message),
-            temperature=0.1,
-        )
-        if len(all_messages) == 6:
-            del all_messages[:2]
-        all_messages.append(current_message)
-        current_response = response["choices"][0]["text"].replace("\n", "")
-        if current_response == "failed":
-            all_messages.append(
-                "I can't estimate a disease, provide me better informations"
-            )
+        if current_message == "help" or current_message == "Help" or current_message == "HELP":
+            all_messages.append(current_message)
+            all_messages.append(HELP_COMMAND)
         else:
-            all_messages.append(
-                f"You potentially have a {prediction(current_response)}. You should try these medications: {find_medications(prediction(current_response))}"
+            response = openai.Completion.create(
+                model="text-davinci-003",
+                prompt=generate_prompt(current_message),
+                temperature=0.1,
             )
+            if len(all_messages) == 6:
+                del all_messages[:2]
+            all_messages.append(current_message)
+            current_response = response["choices"][0]["text"].replace("\n", "")
+            if current_response == "failed":
+                all_messages.append(NO_DISEASE_MESSAGES[random.randint(0, len(NO_DISEASE_MESSAGES) -1)])
+            else:
+                all_messages.append(
+                    f"You potentially have a {prediction(current_response)}. You should try these medications: {find_medications(prediction(current_response))}"
+                )
     return render_template(
         "index.html", welcome_msg=welcome_msg, all_messages=all_messages
     )
