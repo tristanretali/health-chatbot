@@ -34,9 +34,6 @@ p{
     flex-direction: column;
     justify-content: space-between;
 }
-#answer{
-    color: white;
-}
 .message{
     background-color: #3776FF;
     max-width: 45%;
@@ -69,7 +66,7 @@ input[type="submit"]{
     font-size: 17px;
 }
 #button{
-    background-color: white;
+    
     width: 8%;
     border: solid 1px;
     border-radius: 15px;

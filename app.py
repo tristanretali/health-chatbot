@@ -127,7 +127,7 @@ def ask():
             all_messages.append(current_message)
             current_response = response["choices"][0]["text"].replace("\n", "")
             if current_response == "failed":
-                all_messages.append(NO_DISEASE_MESSAGES[random.randint(0, len(NO_DISEASE_MESSAGES) -1)])
+                all_messages.append(NO_DISEASE_MESSAGES[random.randint(0, len(NO_DISEASE_MESSAGES)-1)])
             else:
                 all_messages.append(
                     f"You potentially have a {prediction(current_response)}. You should try these medications: {find_medications(prediction(current_response))}"

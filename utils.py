@@ -1,5 +1,4 @@
 import pandas as pd
-from tensorflow import keras
 from keras.preprocessing.text import Tokenizer
 
 df_symptoms = pd.read_csv("./datasets/final_dataset.csv").iloc[:250000]
