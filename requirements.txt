@@ -5,3 +5,4 @@ pandas
 tensorflow
 azure-core
 azure-storage-file-share
+azure
