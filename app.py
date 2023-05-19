@@ -6,12 +6,17 @@ import utils
 import random
 from tensorflow import keras
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+from azure.core.exceptions import ResourceNotFoundError
+from azure.storage.fileshare import ShareFileClient
 
 
 app = Flask(__name__)
 
 API_KEY = "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"
-MODEL = keras.models.load_model("model")
+CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=healthmodel;AccountKey=sePKfWGoct+Tm3NEZOiWWXsXpbhHc3wN5hhG0JkZygbR14698Vb/oM36nbziO1ZS2VJFwRJaivmh+AStQWrASg==;EndpointSuffix=core.windows.net"
+SHARE_NAME = "ai-model"
+FILE_PATH = "variables.data-00000-of-00001"
+DEST_FILE = "./model/variables/variables.data-00000-of-00001"
 df = pd.read_csv("./datasets/disease_medication_dataset.csv")
 df_fit = utils.df_symptoms
 Y = pd.get_dummies(df_fit["disease"]).values
@@ -21,14 +26,46 @@ openai.api_key = API_KEY
 
 BASIC_PROMPT = "return me each symptom you see in the following sentence and separate them with a blank space and in lower case. If you don't see a symptom return me 'failed' in lower case:"
 NO_DISEASE_MESSAGES = [
-    "I can't estimate a disease, provide me better informations", 
-    "This Chatbot estimates sicknesses based on symptoms and nothing else. Please respect that and enter your symptoms", 
-    "Provide me more details on your symptoms"
+    "I can't estimate a disease, provide me better informations",
+    "This Chatbot estimates sicknesses based on symptoms and nothing else. Please respect that and enter your symptoms",
+    "Provide me more details on your symptoms",
 ]
 HELP_COMMAND = "Hi, this chatbot is designed to give you your sickness based on your symptoms and give you the different medications who treat this disease. Becareful, it's always better to consult a doctor."
 
 welcome_msg = "Welcome in your new Health ChatBot, enter your symptoms"
 all_messages = []
+
+
+def reinitialize_model_file(path):
+    try:
+        open(path, "w").close()
+    except IOError:
+        print("Failure")
+
+
+def load_model_file(connection_string, share_name, file_path, dest_file):
+    try:
+        file_client = ShareFileClient.from_connection_string(
+            conn_str=connection_string,
+            share_name=share_name,
+            file_path=file_path,
+        )
+
+        with open(dest_file, "wb") as file_handle:
+            # Download the file from Azure into a stream
+            data = file_client.download_file()
+            # Write the stream to the local file
+            data.readinto(file_handle)
+
+    except ResourceNotFoundError as ex:
+        print("ResourceNotFoundError:", ex.message)
+
+
+reinitialize_model_file(DEST_FILE)
+
+load_model_file(CONNECTION_STRING, SHARE_NAME, FILE_PATH, DEST_FILE)
+
+MODEL = keras.models.load_model("model")
 
 
 def set_label(df_train, Y) -> list:
@@ -113,7 +150,11 @@ def default():
 def ask():
     if request.form["symptom-input"] != "":
         current_message = request.form["symptom-input"]
-        if current_message == "help" or current_message == "Help" or current_message == "HELP":
+        if (
+            current_message == "help"
+            or current_message == "Help"
+            or current_message == "HELP"
+        ):
             all_messages.append(current_message)
             all_messages.append(HELP_COMMAND)
         else:
@@ -127,7 +168,9 @@ def ask():
             all_messages.append(current_message)
             current_response = response["choices"][0]["text"].replace("\n", "")
             if current_response == "failed":
-                all_messages.append(NO_DISEASE_MESSAGES[random.randint(0, len(NO_DISEASE_MESSAGES)-1)])
+                all_messages.append(
+                    NO_DISEASE_MESSAGES[random.randint(0, len(NO_DISEASE_MESSAGES) - 1)]
+                )
             else:
                 all_messages.append(
                     f"You potentially have a {prediction(current_response)}. You should try these medications: {find_medications(prediction(current_response))}"

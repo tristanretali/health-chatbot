@@ -39,7 +39,6 @@ except Exception:
         max_instances=2,
         # How many seconds will the node running after the job termination
         idle_time_before_scale_down=120,
-        # Dedicated or LowPriority. The latter is cheaper but there is a chance of job termination
         tier="Dedicated",
     )
 
