@@ -3,7 +3,6 @@ flask
 openai
 pandas
 tensorflow
-tensorrt
 azure-core
 azure-storage-file-share
 
