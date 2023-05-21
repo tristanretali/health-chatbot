@@ -36,14 +36,31 @@ welcome_msg = "Welcome in your new Health ChatBot, enter your symptoms"
 all_messages = []
 
 
-def reinitialize_model_file(path):
+def reinitialize_model_file(path: str):
+    """
+    Delete the content of the file
+
+    Args:
+        path (str): path of the file
+    """
     try:
         open(path, "w").close()
     except IOError:
         print("Failure")
 
 
-def load_model_file(connection_string, share_name, file_path, dest_file):
+def load_model_file(
+    connection_string: str, share_name: str, file_path: str, dest_file: str
+):
+    """
+
+
+    Args:
+        connection_string (str): connection string of the Azure file storage
+        share_name (str): name of the Azure File storage
+        file_path (str): path of the file in the Azure File storage
+        dest_file (str): path of the file
+    """
     try:
         file_client = ShareFileClient.from_connection_string(
             conn_str=connection_string,
